@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
@@ -7,31 +7,43 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import { Button } from "@mui/material";
+import axios from "axios";
+import { API_URL } from "../../config";
 
 export default function BillingApproval() {
-  const [requests, setRequests] = useState([
-    {
-      id: "1",
-      user: "John Doe",
-      amount: "2500",
-      description: "Monthly salary release",
-      status: "Pending",
-    },
-    {
-      id: "2",
-      user: "Priya Sharma",
-      amount: "1200",
-      description: "Freelance design payout",
-      status: "Pending",
-    },
-  ]);
+  const [billInfoList, setBilingInfoList] = useState([]);
 
-  const handleAction = (id, action) => {
-    setRequests((prev) =>
-      prev.map((req) =>
-        req.id === id ? { ...req, status: action === "approve" ? "Approved" : "Rejected" } : req
-      )
-    );
+  const handleAction = async (id, action) => {
+    try {
+      const billInfoJson = {
+        paymentId: id,
+        status: action,
+      };
+
+      console.log(billInfoJson);
+      const res = await axios.post(API_URL + "/api/dashboard/updateBillingStatus", billInfoJson, {
+        headers: { "Content-Type": "application/json" },
+      });
+      fetchBillInfo();
+      alert(res.data.message);
+    } catch (err) {
+      console.error("Error fetching vouchers:", err);
+      alert("Voucher Add Failed!");
+    }
+  };
+
+  useEffect(() => {
+    fetchBillInfo();
+  }, []);
+
+  const fetchBillInfo = async () => {
+    try {
+      const res = await axios.get(API_URL + "/api/dashboard/getBillingInFo");
+      console.log(res.data); // assuming backend returns array
+      setBilingInfoList(res.data.billInfoList);
+    } catch (err) {
+      console.error("Error fetching vouchers:", err);
+    }
   };
 
   return (
@@ -58,11 +70,13 @@ export default function BillingApproval() {
                 </MDBox>
 
                 <MDBox p={3}>
-                  {requests.map((req) => (
+                  {billInfoList.map((req) => (
                     <Card key={req.id} style={{ padding: 16, marginBottom: 20 }}>
-                      <MDTypography variant="h6">{req.user}</MDTypography>
+                      <MDTypography variant="h6">
+                        {req.userId?.userName || "Unknown User"}
+                      </MDTypography>
                       <MDTypography variant="body2" color="text">
-                        {req.description}
+                        {req.Description}
                       </MDTypography>
                       <MDTypography variant="body1" sx={{ mt: 1 }}>
                         Amount: ₹{req.amount}
@@ -71,19 +85,19 @@ export default function BillingApproval() {
                         Status: {req.status}
                       </MDTypography>
 
-                      {req.status === "Pending" && (
+                      {req.status === "pending" && (
                         <MDBox display="flex" gap={2} mt={2}>
                           <Button
                             variant="contained"
                             color="success"
-                            onClick={() => handleAction(req.id, "approve")}
+                            onClick={() => handleAction(req._id, "success")}
                           >
                             Approve
                           </Button>
                           <Button
                             variant="contained"
                             color="error"
-                            onClick={() => handleAction(req.id, "reject")}
+                            onClick={() => handleAction(req._id, "failed")}
                           >
                             Reject
                           </Button>

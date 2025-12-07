@@ -61,7 +61,7 @@ const routes = [
     name: "Voucher",
     key: "tables",
     icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
+    route: "/voucher",
     component: <Tables />,
   },
   {

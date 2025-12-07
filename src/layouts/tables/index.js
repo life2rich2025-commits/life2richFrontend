@@ -7,6 +7,9 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
+import axios from "axios";
+import { API_URL } from "../../config";
+
 /* eslint-disable react/prop-types */
 
 import {
@@ -20,7 +23,8 @@ import {
 
 export default function VoucherManagement() {
   const [vouchers, setVouchers] = useState([]);
-  const [open, setOpen] = useState(false);
+  const [isEditOpen, setEditOpen] = useState(false);
+  const [isAddOpen, setAddOpen] = useState(false);
   const [formData, setFormData] = useState({
     id: "",
     title: "",
@@ -28,64 +32,122 @@ export default function VoucherManagement() {
     imageUrl: "",
   });
   const [isEdit, setIsEdit] = useState(false);
-
-  useEffect(() => {
-    setVouchers([
-      {
-        id: "1",
-        title: "New Year Offer",
-        amount: "50",
-        imageUrl: "https://via.placeholder.com/80",
-      },
-      {
-        id: "2",
-        title: "Festive Bonus",
-        amount: "100",
-        imageUrl: "https://via.placeholder.com/80",
-      },
-    ]);
-  }, []);
+  const [vouchersEdit, setVouchersEdit] = useState({});
+  const [categoryAmount, setCategoryAmount] = useState("");
+  const [limitVoucherRange, setLimitVoucherRange] = useState("");
+  const [winPrizeRange, setWinPrizeRange] = useState("");
+  const [winPrizeAmount, setWinPrizeAmount] = useState("");
 
   const handleOpen = () => {
     setIsEdit(false);
     setFormData({ id: "", title: "", amount: "", imageUrl: "" });
-    setOpen(true);
+    setAddOpen(true);
   };
 
   const handleEdit = (voucher) => {
+    console.log(voucher);
     setIsEdit(true);
-    setFormData(voucher);
-    setOpen(true);
+    setVouchersEdit(voucher);
+    setEditOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setVouchers((prev) => prev.filter((v) => v.id !== id));
+  const UpdateVouchers = async (voucherId) => {
+    try {
+      const addVoucherJson = {
+        voucherId: voucherId,
+        winamount: vouchersEdit.winAmount,
+      };
+
+      console.log(addVoucherJson);
+
+      const res = await axios.post(API_URL + "/api/dashboard/updateVoucher", addVoucherJson, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      alert(res.data.message);
+    } catch (err) {
+      console.error("Error fetching vouchers:", err);
+      alert("Voucher Add Failed!");
+    }
+  };
+
+  const handleDelete = async (voucherId) => {
+    try {
+      const deleteVoucherJson = {
+        voucherId: voucherId,
+      };
+
+      const res = await axios.post(API_URL + "/api/dashboard/deleteVoucher", deleteVoucherJson, {
+        headers: { "Content-Type": "application/json" },
+      });
+      fetchVouchers();
+      alert(res.data.message);
+    } catch (err) {
+      console.error("Error fetching vouchers:", err);
+      alert("Voucher Add Failed!");
+    }
+  };
+
+  const fetchVouchers = async () => {
+    try {
+      const res = await axios.get(API_URL + "/api/dashboard/getVoucher");
+      setVouchers(res.data.voucherList); // assuming backend returns array
+    } catch (err) {
+      console.error("Error fetching vouchers:", err);
+    }
+  };
+
+  const addVouchers = async () => {
+    try {
+      const addVoucherJson = {
+        amount: categoryAmount,
+        limitVoucher: limitVoucherRange,
+        winPrizeRange: winPrizeRange,
+      };
+      const res = await axios.post(API_URL + "/api/dashboard/addVoucher", addVoucherJson, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      alert(res.data.message);
+    } catch (err) {
+      console.error("Error fetching vouchers:", err);
+      alert("Voucher Add Failed!");
+    }
+  };
+
+  useEffect(() => {
+    fetchVouchers();
+  }, []);
+
+  const handleEditSave = (voucher) => {
+    console.log(voucher);
+    setEditOpen(false);
+    UpdateVouchers(voucher._id);
+    fetchVouchers();
   };
 
   const handleSave = () => {
-    if (isEdit) {
-      setVouchers((prev) => prev.map((v) => (v.id === formData.id ? formData : v)));
-    } else {
-      setVouchers((prev) => [...prev, { ...formData, id: Date.now().toString() }]);
-    }
-    setOpen(false);
+    setAddOpen(false);
+    addVouchers();
   };
 
   const columns = [
-    { Header: "ID", accessor: "id" },
-    { Header: "Title", accessor: "title" },
-    { Header: "Amount", accessor: "amount" },
-    {
-      Header: "Image",
-      accessor: "imageUrl",
-      Cell: ({ value }) => <img src={value} width="50" alt="voucher" />,
-    },
+    { Header: "Position", accessor: "position" },
+    { Header: "VoucherId", accessor: "voucherId" },
+    { Header: "Category", accessor: "categoryAmount" },
+    { Header: "WinAmount", accessor: "winAmount" },
+    { Header: "createdAt", accessor: "createdAt" },
     {
       Header: "Actions",
       accessor: "action",
       Cell: ({ row }) => (
         <MDBox display="flex" gap={1}>
-          <Button variant="contained" size="small" onClick={() => handleEdit(row.original)}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => handleEdit(row.original)}
+            sx={{ color: "#fff" }}
+          >
             Edit
           </Button>
 
@@ -93,7 +155,8 @@ export default function VoucherManagement() {
             variant="outlined"
             size="small"
             color="error"
-            onClick={() => handleDelete(row.original.id)}
+            sx={{ color: "red", borderColor: "red" }}
+            onClick={() => handleDelete(row.original._id)}
           >
             Delete
           </Button>
@@ -128,7 +191,7 @@ export default function VoucherManagement() {
               </MDBox>
 
               <MDBox display="flex" justifyContent="flex-end" p={2}>
-                <Button variant="contained" onClick={handleOpen}>
+                <Button variant="contained" onClick={handleOpen} sx={{ color: "#fff" }}>
                   Add Voucher
                 </Button>
               </MDBox>
@@ -136,10 +199,9 @@ export default function VoucherManagement() {
               <MDBox pt={3}>
                 <DataTable
                   table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
+                  isSorted={true}
+                  entriesPerPage={true}
+                  showTotalEntries={true}
                 />
               </MDBox>
             </Card>
@@ -148,8 +210,8 @@ export default function VoucherManagement() {
       </MDBox>
 
       {/* Add / Edit Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>{isEdit ? "Edit Voucher" : "Add Voucher"}</DialogTitle>
+      <Dialog open={isEditOpen} onClose={() => setEditOpen(false)}>
+        <DialogTitle>{"Edit Voucher"}</DialogTitle>
         <DialogContent
           sx={{
             display: "flex",
@@ -159,31 +221,86 @@ export default function VoucherManagement() {
           }}
         >
           <TextField
-            label="Title"
-            value={formData.title}
+            label="Category Amount"
+            value={vouchersEdit.categoryAmount}
+            InputProps={{ readOnly: true }}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             fullWidth
           />
 
           <TextField
-            label="Amount"
-            value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-            fullWidth
-          />
-
-          <TextField
-            label="Image URL"
-            value={formData.imageUrl}
-            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+            label="Win Amount"
+            value={vouchersEdit.winAmount}
+            onChange={(e) => {
+              setVouchersEdit({
+                ...vouchersEdit,
+                winAmount: e.target.value,
+              });
+            }}
             fullWidth
           />
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave}>
-            {isEdit ? "Update" : "Save"}
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            sx={{ color: "#fff" }}
+            onClick={() => handleEditSave(vouchersEdit)}
+          >
+            {"Update"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isAddOpen} onClose={() => setAddOpen(false)}>
+        <DialogTitle>{"Add Voucher"}</DialogTitle>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            minWidth: 400,
+          }}
+        >
+          <MDBox mt={2}>
+            <label>
+              <strong>CategoryAmount</strong>
+            </label>
+            <select
+              value={categoryAmount}
+              onChange={(e) => setCategoryAmount(e.target.value)}
+              style={{
+                width: "100%",
+                padding: 10,
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                marginTop: 5,
+              }}
+            >
+              <option value="100">100</option>
+              <option value="50">50</option>
+            </select>
+          </MDBox>
+          <TextField
+            label="LimitRange Voucher"
+            value={limitVoucherRange}
+            onChange={(e) => setLimitVoucherRange(e.target.value)}
+            fullWidth
+          />
+
+          <TextField
+            label="Win Prize Range"
+            value={winPrizeRange}
+            onChange={(e) => setWinPrizeRange(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setAddOpen(false)}>Cancel</Button>
+          <Button variant="contained" sx={{ color: "#fff" }} onClick={handleSave}>
+            {"Save"}
           </Button>
         </DialogActions>
       </Dialog>
