@@ -5,6 +5,7 @@ import Switch from "@mui/material/Switch";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import axios from "axios";
+import { API_URL } from "../../config";
 
 import MDBox from "components/MDBox";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -53,7 +54,7 @@ function Dashboard() {
     formData.append("status", true);
 
     try {
-      const res = await axios.put("http://localhost:4000/api/dashboard/uploadImage", formData, {
+      const res = await axios.put(API_URL + "/api/dashboard/uploadImage", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -77,7 +78,7 @@ function Dashboard() {
     };
 
     try {
-      const res = await axios.post("http://localhost:4000/api/dashboard/addOffer", newOffer, {
+      const res = await axios.post(API_URL + "/api/dashboard/addOffer", newOffer, {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -100,7 +101,7 @@ function Dashboard() {
 
   const fetchDashboardImages = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/dashboard/home");
+      const res = await axios.get(API_URL + "/api/dashboard/home");
       setDashboard(res.data.reponse);
       setDashboardImage(res.data.reponse.imageUrl || []);
       setOffer(res.data.reponse.offer || []);
@@ -339,7 +340,7 @@ function DashboardImageTable({ images }) {
 
               <td style={{ padding: 10, border: "1px solid #ddd" }}>
                 <img
-                  src={"http://localhost:4000" + img.imageUrl}
+                  src={API_URL + img.imageUrl}
                   alt="uploaded"
                   style={{ width: 60, borderRadius: 8 }}
                 />
