@@ -63,7 +63,7 @@ export default function VoucherManagement() {
       const res = await axios.post(API_URL + "/api/dashboard/updateVoucher", addVoucherJson, {
         headers: { "Content-Type": "application/json" },
       });
-
+      fetchVouchers();
       alert(res.data.message);
     } catch (err) {
       console.error("Error fetching vouchers:", err);
