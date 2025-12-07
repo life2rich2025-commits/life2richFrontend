@@ -100,14 +100,14 @@ export default function VoucherManagement() {
   const addVouchers = async () => {
     try {
       const addVoucherJson = {
-        amount: categoryAmount,
+        amount: categoryAmount || "500",
         limitVoucher: limitVoucherRange,
         winPrizeRange: winPrizeRange,
       };
       const res = await axios.post(API_URL + "/api/dashboard/addVoucher", addVoucherJson, {
         headers: { "Content-Type": "application/json" },
       });
-
+      fetchVouchers();
       alert(res.data.message);
     } catch (err) {
       console.error("Error fetching vouchers:", err);
@@ -278,6 +278,7 @@ export default function VoucherManagement() {
                 marginTop: 5,
               }}
             >
+              <option value="500">500</option>
               <option value="100">100</option>
               <option value="50">50</option>
             </select>
