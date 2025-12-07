@@ -4,12 +4,16 @@ import Grid from "@mui/material/Grid";
 import Switch from "@mui/material/Switch";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
+
 import MDBox from "components/MDBox";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
 
+/* =====================================================================
+   MAIN DASHBOARD COMPONENT
+===================================================================== */
 function Dashboard() {
   /* ------------------ DASHBOARD IMAGE STATE -------------------- */
   const [selectedImage, setSelectedImage] = useState(null);
@@ -22,7 +26,7 @@ function Dashboard() {
   const [isOfferActive, setIsOfferActive] = useState(true);
   const [offers, setOffers] = useState([]);
 
-  /* ------------------ IMAGE UPLOAD HANDLER -------------------- */
+  /* ------------------ HANDLE IMAGE UPLOAD -------------------- */
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file)
@@ -32,7 +36,7 @@ function Dashboard() {
       });
   };
 
-  /* ------------------ SAVE DASHBOARD IMAGE -------------------- */
+  /* ------------------ SAVE IMAGE -------------------- */
   const saveDashboardImage = () => {
     if (!selectedImage) return;
 
@@ -43,7 +47,7 @@ function Dashboard() {
 
     setDashboardImages([...dashboardImages, newImage]);
 
-    // reset
+    // Reset
     setSelectedImage(null);
     setIsImageActive(true);
   };
@@ -60,7 +64,7 @@ function Dashboard() {
 
     setOffers([...offers, newOffer]);
 
-    // reset
+    // Reset
     setOfferTitle("");
     setValidDate("");
     setIsOfferActive(true);
@@ -71,14 +75,16 @@ function Dashboard() {
       <DashboardNavbar />
 
       <MDBox py={3}>
-        {/* ------------------ STATS CARDS ------------------ */}
+        {/* ------------------ STAT CARDS ------------------ */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>
             <ComplexStatisticsCard color="dark" icon="weekend" title="Total Voucher" count={281} />
           </Grid>
+
           <Grid item xs={12} md={6} lg={3}>
             <ComplexStatisticsCard icon="leaderboard" title="Total Users" count="2,300" />
           </Grid>
+
           <Grid item xs={12} md={6} lg={3}>
             <ComplexStatisticsCard
               color="success"
@@ -87,6 +93,7 @@ function Dashboard() {
               count="34k"
             />
           </Grid>
+
           <Grid item xs={12} md={6} lg={3}>
             <ComplexStatisticsCard
               color="primary"
@@ -98,7 +105,7 @@ function Dashboard() {
         </Grid>
 
         {/* ------------------------------------------------------------
-             SECTION 1: UPLOAD DASHBOARD IMAGE (SEPARATE)
+             SECTION 1: UPLOAD DASHBOARD IMAGE
         ------------------------------------------------------------ */}
         <MDBox mt={4}>
           <Card style={{ padding: 20 }}>
@@ -126,14 +133,14 @@ function Dashboard() {
               />
             )}
 
-            {/* Status */}
+            {/* Status Toggle */}
             <MDBox mt={2} display="flex" alignItems="center" gap={2}>
               <strong>Status:</strong>
               <Switch checked={isImageActive} onChange={() => setIsImageActive(!isImageActive)} />
               <strong>{isImageActive ? "Active" : "Inactive"}</strong>
             </MDBox>
 
-            {/* Save Button */}
+            {/* Save */}
             <Button
               variant="contained"
               color="primary"
@@ -145,18 +152,19 @@ function Dashboard() {
           </Card>
         </MDBox>
 
-        {/* Dashboard Image Table */}
+        {/* ------ Image Table -------- */}
         <MDBox mt={4}>
           <DashboardImageTable images={dashboardImages} />
         </MDBox>
 
         {/* ------------------------------------------------------------
-             SECTION 2: AVAILABLE OFFER (SEPARATE)
+             SECTION 2: CREATE OFFER
         ------------------------------------------------------------ */}
         <MDBox mt={6}>
           <Card style={{ padding: 20 }}>
             <h3>Available Offer</h3>
 
+            {/* Offer Title */}
             <MDBox mt={2}>
               <label>
                 <strong>Offer Title</strong>
@@ -176,6 +184,7 @@ function Dashboard() {
               />
             </MDBox>
 
+            {/* Valid Date */}
             <MDBox mt={2}>
               <label>
                 <strong>Valid Date</strong>
@@ -194,12 +203,14 @@ function Dashboard() {
               />
             </MDBox>
 
+            {/* Status Toggle */}
             <MDBox mt={2} display="flex" alignItems="center" gap={2}>
               <strong>Status:</strong>
               <Switch checked={isOfferActive} onChange={() => setIsOfferActive(!isOfferActive)} />
               <strong>{isOfferActive ? "Active" : "Inactive"}</strong>
             </MDBox>
 
+            {/* Save */}
             <Button
               variant="contained"
               color="success"
@@ -211,7 +222,7 @@ function Dashboard() {
           </Card>
         </MDBox>
 
-        {/* Offer Table */}
+        {/* ------ Offer Table -------- */}
         <MDBox mt={4}>
           <OfferTable offers={offers} />
         </MDBox>
@@ -222,7 +233,9 @@ function Dashboard() {
   );
 }
 
-/* --------------------- TABLE: Dashboard Images --------------------- */
+/* =====================================================================
+   TABLE 1: Dashboard Images
+===================================================================== */
 function DashboardImageTable({ images }) {
   return (
     <Card style={{ padding: 20 }}>
@@ -241,9 +254,11 @@ function DashboardImageTable({ images }) {
           {images.map((img, idx) => (
             <tr key={idx}>
               <td style={{ padding: 10, border: "1px solid #ddd" }}>{idx + 1}</td>
+
               <td style={{ padding: 10, border: "1px solid #ddd" }}>
                 <img src={img.url} alt="uploaded" style={{ width: 60, borderRadius: 8 }} />
               </td>
+
               <td style={{ padding: 10, border: "1px solid #ddd" }}>
                 <span
                   style={{
@@ -264,7 +279,13 @@ function DashboardImageTable({ images }) {
   );
 }
 
-/* -------------------------- TABLE: Offers -------------------------- */
+DashboardImageTable.propTypes = {
+  images: PropTypes.array.isRequired,
+};
+
+/* =====================================================================
+   TABLE 2: Offers
+===================================================================== */
 function OfferTable({ offers }) {
   return (
     <Card style={{ padding: 20 }}>
@@ -286,6 +307,7 @@ function OfferTable({ offers }) {
               <td style={{ padding: 10, border: "1px solid #ddd" }}>{idx + 1}</td>
               <td style={{ padding: 10, border: "1px solid #ddd" }}>{item.title}</td>
               <td style={{ padding: 10, border: "1px solid #ddd" }}>{item.validDate}</td>
+
               <td style={{ padding: 10, border: "1px solid #ddd" }}>
                 <span
                   style={{
@@ -305,5 +327,9 @@ function OfferTable({ offers }) {
     </Card>
   );
 }
+
+OfferTable.propTypes = {
+  offers: PropTypes.array.isRequired,
+};
 
 export default Dashboard;

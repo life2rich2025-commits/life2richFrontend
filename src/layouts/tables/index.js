@@ -7,6 +7,8 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
+/* eslint-disable react/prop-types */
+
 import {
   Button,
   Dialog,
@@ -19,11 +21,15 @@ import {
 export default function VoucherManagement() {
   const [vouchers, setVouchers] = useState([]);
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({ id: "", title: "", amount: "", imageUrl: "" });
+  const [formData, setFormData] = useState({
+    id: "",
+    title: "",
+    amount: "",
+    imageUrl: "",
+  });
   const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => {
-    // mock data — replace with API call
     setVouchers([
       {
         id: "1",
@@ -40,40 +46,10 @@ export default function VoucherManagement() {
     ]);
   }, []);
 
-  const columns = [
-    { Header: "ID", accessor: "id" },
-    { Header: "Title", accessor: "title" },
-    { Header: "Amount", accessor: "amount" },
-    {
-      Header: "Image",
-      accessor: "imageUrl",
-      Cell: ({ value }) => <img src={value} width={50} alt="voucher" />,
-    },
-    {
-      Header: "Actions",
-      accessor: "action",
-      Cell: ({ row }) => (
-        <MDBox display="flex" gap={1}>
-          <Button variant="contained" size="small" onClick={() => handleEdit(row.original)}>
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={() => handleDelete(row.original.id)}
-          >
-            Delete
-          </Button>
-        </MDBox>
-      ),
-    },
-  ];
-
   const handleOpen = () => {
-    setOpen(true);
     setIsEdit(false);
     setFormData({ id: "", title: "", amount: "", imageUrl: "" });
+    setOpen(true);
   };
 
   const handleEdit = (voucher) => {
@@ -83,21 +59,55 @@ export default function VoucherManagement() {
   };
 
   const handleDelete = (id) => {
-    setVouchers(vouchers.filter((v) => v.id !== id));
+    setVouchers((prev) => prev.filter((v) => v.id !== id));
   };
 
   const handleSave = () => {
     if (isEdit) {
-      setVouchers(vouchers.map((v) => (v.id === formData.id ? formData : v)));
+      setVouchers((prev) => prev.map((v) => (v.id === formData.id ? formData : v)));
     } else {
-      setVouchers([...vouchers, { ...formData, id: Date.now().toString() }]);
+      setVouchers((prev) => [...prev, { ...formData, id: Date.now().toString() }]);
     }
     setOpen(false);
   };
 
+  const columns = [
+    { Header: "ID", accessor: "id" },
+    { Header: "Title", accessor: "title" },
+    { Header: "Amount", accessor: "amount" },
+    {
+      Header: "Image",
+      accessor: "imageUrl",
+      Cell: ({ value }) => <img src={value} width="50" alt="voucher" />,
+    },
+    {
+      Header: "Actions",
+      accessor: "action",
+      Cell: ({ row }) => (
+        <MDBox display="flex" gap={1}>
+          <Button variant="contained" size="small" onClick={() => handleEdit(row.original)}>
+            Edit
+          </Button>
+
+          <Button
+            variant="outlined"
+            size="small"
+            color="error"
+            onClick={() => handleDelete(row.original.id)}
+          >
+            Delete
+          </Button>
+        </MDBox>
+      ),
+    },
+  ];
+
+  const rows = vouchers;
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
@@ -125,7 +135,7 @@ export default function VoucherManagement() {
 
               <MDBox pt={3}>
                 <DataTable
-                  table={{ columns, rows: vouchers }}
+                  table={{ columns, rows }}
                   isSorted={false}
                   entriesPerPage={false}
                   showTotalEntries={false}
@@ -137,28 +147,39 @@ export default function VoucherManagement() {
         </Grid>
       </MDBox>
 
+      {/* Add / Edit Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogTitle>{isEdit ? "Edit Voucher" : "Add Voucher"}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 400 }}>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            minWidth: 400,
+          }}
+        >
           <TextField
             label="Title"
-            fullWidth
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            fullWidth
           />
+
           <TextField
             label="Amount"
-            fullWidth
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            fullWidth
           />
+
           <TextField
             label="Image URL"
-            fullWidth
             value={formData.imageUrl}
             onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+            fullWidth
           />
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleSave}>
