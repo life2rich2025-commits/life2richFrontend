@@ -318,6 +318,14 @@ function Dashboard() {
    TABLE 1: Dashboard Images
 ===================================================================== */
 function DashboardImageTable({ images }) {
+  const handleDelete = async (id) => {
+    try {
+      console.log("handleDelete>>>>>>>>>", id);
+    } catch (err) {
+      console.log("Error handleDelete :", err);
+    }
+  };
+
   return (
     <Card style={{ padding: 20 }}>
       <h3>Banner Images</h3>
@@ -330,6 +338,7 @@ function DashboardImageTable({ images }) {
             <th style={{ padding: 10, border: "1px solid #ddd" }}>Image Name</th>
             <th style={{ padding: 10, border: "1px solid #ddd" }}>Image Tag</th>
             <th style={{ padding: 10, border: "1px solid #ddd" }}>Status</th>
+            <th style={{ padding: 10, border: "1px solid #ddd" }}></th>
           </tr>
         </thead>
 
@@ -353,13 +362,23 @@ function DashboardImageTable({ images }) {
                 <span
                   style={{
                     padding: "4px 10px",
-                    background: img.active ? "#4caf50" : "#f44336",
+                    background: img.status ? "#4caf50" : "#f44336",
                     color: "#fff",
                     borderRadius: 6,
                   }}
                 >
-                  {img.active ? "Active" : "Inactive"}
+                  {img.status ? "Active" : "Inactive"}
                 </span>
+              </td>
+              <td style={{ padding: 10, border: "1px solid #ddd" }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleDelete(img._id)}
+                  sx={{ color: "#fff" }}
+                >
+                  Delete
+                </Button>
               </td>
             </tr>
           ))}
