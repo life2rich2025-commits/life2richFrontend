@@ -110,6 +110,25 @@ function Dashboard() {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      const res = await axios.post(
+        API_URL + "/api/dashboard/deleteBannerImage",
+        {
+          bannerId: id,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      fetchDashboardImages();
+      alert(res.data.message);
+    } catch (err) {
+      console.log("Error fetching images:", err);
+      alert("Banner Image Delete Failed");
+    }
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -215,7 +234,7 @@ function Dashboard() {
 
         {/* ------ Image Table -------- */}
         <MDBox mt={4}>
-          <DashboardImageTable images={dashboardImage} />
+          <DashboardImageTable images={dashboardImage} onDelete={(id) => handleDelete(id)} />
         </MDBox>
 
         {/* ------------------------------------------------------------
@@ -317,15 +336,7 @@ function Dashboard() {
 /* =====================================================================
    TABLE 1: Dashboard Images
 ===================================================================== */
-function DashboardImageTable({ images }) {
-  const handleDelete = async (id) => {
-    try {
-      console.log("handleDelete>>>>>>>>>", id);
-    } catch (err) {
-      console.log("Error handleDelete :", err);
-    }
-  };
-
+function DashboardImageTable({ images, onDelete }) {
   return (
     <Card style={{ padding: 20 }}>
       <h3>Banner Images</h3>
@@ -374,7 +385,7 @@ function DashboardImageTable({ images }) {
                 <Button
                   variant="contained"
                   size="small"
-                  onClick={() => handleDelete(img._id)}
+                  onClick={() => onDelete(img._id)}
                   sx={{ color: "#fff" }}
                 >
                   Delete
@@ -390,6 +401,7 @@ function DashboardImageTable({ images }) {
 
 DashboardImageTable.propTypes = {
   images: PropTypes.array.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 /* =====================================================================
