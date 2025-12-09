@@ -278,9 +278,11 @@ export default function VoucherManagement() {
                 marginTop: 5,
               }}
             >
+              <option value="100">1000</option>
               <option value="500">500</option>
               <option value="100">100</option>
               <option value="50">50</option>
+              <option value="100">10</option>
             </select>
           </MDBox>
           <TextField
