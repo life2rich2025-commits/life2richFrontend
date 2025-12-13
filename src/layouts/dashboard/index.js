@@ -112,6 +112,7 @@ function Dashboard() {
 
   const handleDelete = async (id) => {
     try {
+      if (!window.confirm("Are you sure you want to delete this Voucher?")) return;
       const res = await axios.post(
         API_URL + "/api/dashboard/deleteBannerImage",
         {

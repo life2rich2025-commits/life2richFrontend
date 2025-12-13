@@ -87,6 +87,7 @@ export default function VoucherManagement() {
   // Delete voucher
   const handleDelete = async (voucherId) => {
     try {
+      if (!window.confirm("Are you sure you want to delete this Banner Image?")) return;
       const res = await axios.post(
         API_URL + "/api/dashboard/deleteVoucher",
         { voucherId },

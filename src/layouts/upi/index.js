@@ -76,51 +76,69 @@ function CompanyUPI() {
   // Validate UPI
   const isValidUpi = (id) => /^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(id);
 
-  // Add new UPI
-  // const handleSubmit = () => {
-  //   if (!title || !upiId) {
-  //     alert("Please enter Payment Type and UPI ID!");
-  //     return;
-  //   }
-  //   if (!isValidUpi(upiId)) {
-  //     alert("Invalid UPI format! Use example@upi");
-  //     return;
-  //   }
-
-  //   const newItem = { id: Date.now(), title, upiId, status };
-  //   setUpiList([...upiList, newItem]);
-  //   setTitle("");
-  //   setUpiId("");
-  //   setStatus(true);
-  // };
+  const fetchUPI = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/dashboard/getupi`);
+      const formatted = res.data.response.map((item) => ({
+        id: item._id,
+        title: item.paymentType,
+        upiId: item.upiid,
+        status: item.status,
+      }));
+      setUpiList(formatted);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    const fetchUPI = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/dashboard/getupi`);
-        const formatted = res.data.response.map((item) => ({
-          id: item._id,
-          title: item.paymentType,
-          upiId: item.upiid,
-          status: item.status,
-        }));
-        setUpiList(formatted);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchUPI();
   }, []);
 
-  // Toggle status
-  const toggleStatus = (id) => {
-    setUpiList(upiList.map((item) => (item.id === id ? { ...item, status: !item.status } : item)));
+  const toggleStatus = async (id) => {
+    const currentItem = upiList.find((item) => item.id === id);
+    if (!currentItem) return;
+
+    // ✅ check if some OTHER UPI is already active
+    const alreadyActive = upiList.find((item) => item.status === true && item.id !== id);
+
+    if (alreadyActive) {
+      alert("Another UPI is already active");
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${API_URL}/api/dashboard/updateupi`, {
+        upiId: id,
+        status: !currentItem.status,
+      });
+
+      if (res.data.success) {
+        setUpiList((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, status: !item.status } : item))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update UPI status");
+    }
   };
 
-  // Delete UPI
-  const deleteUPI = (id) => {
-    setUpiList(upiList.filter((item) => item.id !== id));
+  const deleteUPI = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this UPI?")) return;
+
+    try {
+      const res = await axios.post(`${API_URL}/api/dashboard/deleteupi`, {
+        upiId: id,
+      });
+
+      if (res.data.message) {
+        fetchUPI();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete UPI");
+    }
   };
 
   const handleSubmit = async () => {
@@ -219,19 +237,6 @@ function CompanyUPI() {
                   placeholder="example@upi"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                />
-              </MDBox>
-
-              <MDBox mb={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={status}
-                      onChange={(e) => setStatus(e.target.checked)}
-                      color="success"
-                    />
-                  }
-                  label={status ? "Active" : "Inactive"}
                 />
               </MDBox>
 
