@@ -40,6 +40,7 @@ import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import Notifications from "layouts/notifications";
+import UPI from "layouts/upi";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
@@ -71,6 +72,14 @@ const routes = [
     icon: <Icon fontSize="small">receipt_long</Icon>,
     route: "/billing",
     component: <Billing />,
+  },
+  {
+    type: "collapse",
+    name: "Company UPI",
+    key: "company upi",
+    icon: <Icon fontSize="small">receipt_long</Icon>,
+    route: "/upi",
+    component: <UPI />,
   },
   {
     type: "collapse",

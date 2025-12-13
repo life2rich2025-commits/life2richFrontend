@@ -9,9 +9,9 @@ import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import axios from "axios";
 import { API_URL } from "../../config";
+import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
 
 /* eslint-disable react/prop-types */
-
 import {
   Button,
   Dialog,
@@ -23,80 +23,34 @@ import {
 
 export default function VoucherManagement() {
   const [vouchers, setVouchers] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [dummyVouchers, setDummyVouchers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isEditOpen, setEditOpen] = useState(false);
   const [isAddOpen, setAddOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    id: "",
-    title: "",
-    amount: "",
-    imageUrl: "",
-  });
-  const [isEdit, setIsEdit] = useState(false);
   const [vouchersEdit, setVouchersEdit] = useState({});
   const [categoryAmount, setCategoryAmount] = useState("");
   const [limitVoucherRange, setLimitVoucherRange] = useState("");
   const [winPrizeRange, setWinPrizeRange] = useState("");
-  const [winPrizeAmount, setWinPrizeAmount] = useState("");
 
-  const handleOpen = () => {
-    setIsEdit(false);
-    setFormData({ id: "", title: "", amount: "", imageUrl: "" });
-    setAddOpen(true);
-  };
-
-  const handleEdit = (voucher) => {
-    console.log(voucher);
-    setIsEdit(true);
-    setVouchersEdit(voucher);
-    setEditOpen(true);
-  };
-
-  const UpdateVouchers = async (voucherId) => {
-    try {
-      const addVoucherJson = {
-        voucherId: voucherId,
-        winamount: vouchersEdit.winAmount,
-      };
-
-      console.log(addVoucherJson);
-
-      const res = await axios.post(API_URL + "/api/dashboard/updateVoucher", addVoucherJson, {
-        headers: { "Content-Type": "application/json" },
-      });
-      fetchVouchers();
-      alert(res.data.message);
-    } catch (err) {
-      console.error("Error fetching vouchers:", err);
-      alert("Voucher Add Failed!");
-    }
-  };
-
-  const handleDelete = async (voucherId) => {
-    try {
-      const deleteVoucherJson = {
-        voucherId: voucherId,
-      };
-
-      const res = await axios.post(API_URL + "/api/dashboard/deleteVoucher", deleteVoucherJson, {
-        headers: { "Content-Type": "application/json" },
-      });
-      fetchVouchers();
-      alert(res.data.message);
-    } catch (err) {
-      console.error("Error fetching vouchers:", err);
-      alert("Voucher Add Failed!");
-    }
-  };
-
+  // Fetch vouchers from backend
   const fetchVouchers = async () => {
     try {
       const res = await axios.get(API_URL + "/api/dashboard/getVoucher");
-      setVouchers(res.data.voucherList); // assuming backend returns array
+      const voucherList = res.data.voucherList || [];
+      setVouchers(voucherList);
+      setRows(voucherList);
+      setDummyVouchers(voucherList);
     } catch (err) {
       console.error("Error fetching vouchers:", err);
     }
   };
 
+  useEffect(() => {
+    fetchVouchers();
+  }, []);
+
+  // Add voucher
   const addVouchers = async () => {
     try {
       const addVoucherJson = {
@@ -110,33 +64,62 @@ export default function VoucherManagement() {
       fetchVouchers();
       alert(res.data.message);
     } catch (err) {
-      console.error("Error fetching vouchers:", err);
+      console.error("Error adding voucher:", err);
       alert("Voucher Add Failed!");
     }
   };
 
-  useEffect(() => {
-    fetchVouchers();
-  }, []);
-
-  const handleEditSave = (voucher) => {
-    console.log(voucher);
-    setEditOpen(false);
-    UpdateVouchers(voucher._id);
-    fetchVouchers();
+  // Update voucher
+  const UpdateVouchers = async (voucherId) => {
+    try {
+      const updateData = { voucherId, winamount: vouchersEdit.winAmount };
+      const res = await axios.post(API_URL + "/api/dashboard/updateVoucher", updateData, {
+        headers: { "Content-Type": "application/json" },
+      });
+      fetchVouchers();
+      alert(res.data.message);
+    } catch (err) {
+      console.error("Error updating vouchers:", err);
+      alert("Voucher Update Failed!");
+    }
   };
 
-  const handleSave = () => {
-    setAddOpen(false);
-    addVouchers();
+  // Delete voucher
+  const handleDelete = async (voucherId) => {
+    try {
+      const res = await axios.post(
+        API_URL + "/api/dashboard/deleteVoucher",
+        { voucherId },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      fetchVouchers();
+      alert(res.data.message);
+    } catch (err) {
+      console.error("Error deleting vouchers:", err);
+      alert("Voucher Delete Failed!");
+    }
   };
 
+  // Handle search/filter
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query.trim() === "") {
+      setRows(dummyVouchers);
+      return;
+    }
+    const filtered = vouchers.filter(
+      (v) => v.categoryAmount?.toString().toLowerCase() === query.toLowerCase()
+    );
+    setRows(filtered);
+  };
+
+  // Columns for DataTable
   const columns = [
     { Header: "Position", accessor: "position" },
     { Header: "VoucherId", accessor: "voucherId" },
     { Header: "Category", accessor: "categoryAmount" },
     { Header: "WinAmount", accessor: "winAmount" },
-    { Header: "createdAt", accessor: "createdAt" },
+    { Header: "CreatedAt", accessor: "createdAt" },
     {
       Header: "Actions",
       accessor: "action",
@@ -145,12 +128,14 @@ export default function VoucherManagement() {
           <Button
             variant="contained"
             size="small"
-            onClick={() => handleEdit(row.original)}
+            onClick={() => {
+              setVouchersEdit(row.original);
+              setEditOpen(true);
+            }}
             sx={{ color: "#fff" }}
           >
             Edit
           </Button>
-
           <Button
             variant="outlined"
             size="small"
@@ -165,12 +150,16 @@ export default function VoucherManagement() {
     },
   ];
 
-  const rows = vouchers;
+  // Compute category counts based on current rows
+  const categoryCounts = rows.reduce((acc, voucher) => {
+    const key = voucher.categoryAmount || "Unknown";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
@@ -190,82 +179,76 @@ export default function VoucherManagement() {
                 </MDTypography>
               </MDBox>
 
-              <MDBox display="flex" justifyContent="flex-end" p={2}>
-                <Button variant="contained" onClick={handleOpen} sx={{ color: "#fff" }}>
+              <MDBox display="flex" justifyContent="flex-end" alignItems="center" p={2} gap={2}>
+                <Button variant="contained" onClick={() => setAddOpen(true)} sx={{ color: "#fff" }}>
                   Add Voucher
                 </Button>
+
+                <TextField
+                  size="small"
+                  placeholder="Search by category..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </MDBox>
+
+              {/* Display category counts as cards */}
+              <MDBox px={2} py={1} display="flex" gap={2} flexWrap="wrap">
+                {Object.entries(categoryCounts).map(([category, count]) => (
+                  <Grid item xs={12} md={6} lg={3} key={category}>
+                    <ComplexStatisticsCard
+                      icon="loyalty"
+                      title={category + " Category"}
+                      count={count}
+                    />
+                  </Grid>
+                ))}
               </MDBox>
 
               <MDBox pt={3}>
-                <DataTable
-                  table={{ columns, rows }}
-                  isSorted={true}
-                  entriesPerPage={true}
-                  showTotalEntries={true}
-                />
+                <DataTable table={{ columns, rows }} isSorted entriesPerPage showTotalEntries />
               </MDBox>
             </Card>
           </Grid>
         </Grid>
       </MDBox>
 
-      {/* Add / Edit Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={isEditOpen} onClose={() => setEditOpen(false)}>
-        <DialogTitle>{"Edit Voucher"}</DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            minWidth: 400,
-          }}
-        >
+        <DialogTitle>Edit Voucher</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 400 }}>
           <TextField
             label="Category Amount"
-            value={vouchersEdit.categoryAmount}
+            value={vouchersEdit.categoryAmount || ""}
             InputProps={{ readOnly: true }}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             fullWidth
           />
-
           <TextField
             label="Win Amount"
-            value={vouchersEdit.winAmount}
-            onChange={(e) => {
-              setVouchersEdit({
-                ...vouchersEdit,
-                winAmount: e.target.value,
-              });
-            }}
+            value={vouchersEdit.winAmount || ""}
+            onChange={(e) => setVouchersEdit({ ...vouchersEdit, winAmount: e.target.value })}
             fullWidth
           />
         </DialogContent>
-
         <DialogActions>
           <Button onClick={() => setEditOpen(false)}>Cancel</Button>
           <Button
             variant="contained"
             sx={{ color: "#fff" }}
-            onClick={() => handleEditSave(vouchersEdit)}
+            onClick={() => UpdateVouchers(vouchersEdit._id)}
           >
-            {"Update"}
+            Update
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Add Dialog */}
       <Dialog open={isAddOpen} onClose={() => setAddOpen(false)}>
-        <DialogTitle>{"Add Voucher"}</DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            minWidth: 400,
-          }}
-        >
+        <DialogTitle>Add Voucher</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 400 }}>
           <MDBox mt={2}>
             <label>
-              <strong>CategoryAmount</strong>
+              <strong>Category Amount</strong>
             </label>
             <select
               value={categoryAmount}
@@ -291,7 +274,6 @@ export default function VoucherManagement() {
             onChange={(e) => setLimitVoucherRange(e.target.value)}
             fullWidth
           />
-
           <TextField
             label="Win Prize Range"
             value={winPrizeRange}
@@ -299,15 +281,13 @@ export default function VoucherManagement() {
             fullWidth
           />
         </DialogContent>
-
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button variant="contained" sx={{ color: "#fff" }} onClick={handleSave}>
-            {"Save"}
+          <Button variant="contained" sx={{ color: "#fff" }} onClick={addVouchers}>
+            Save
           </Button>
         </DialogActions>
       </Dialog>
-
       <Footer />
     </DashboardLayout>
   );
