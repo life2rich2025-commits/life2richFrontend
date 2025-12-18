@@ -14,6 +14,8 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 import MDSnackbar from "components/MDSnackbar";
+import axios from "axios";
+import { API_URL } from "../../config";
 
 // Layout
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -26,12 +28,28 @@ function CreateNotification() {
   const [type, setType] = useState("info");
   const [openSB, setOpenSB] = useState(false);
 
-  const handleSubmit = () => {
-    if (!title || !message) {
-      alert("Please enter title and message!");
-      return;
+  const handleSubmit = async () => {
+    try {
+      if (!title || !message) {
+        alert("Please enter title and message!");
+        return;
+      }
+      setOpenSB(true);
+
+      const res = await axios.post(`${API_URL}/api/notification/send`, {
+        title: title,
+        body: message,
+      });
+
+      if (res.data.success) {
+        setTitle("");
+        setMessage("");
+        // fetchUPI();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to send Notification");
     }
-    setOpenSB(true);
   };
 
   const closeSB = () => setOpenSB(false);
@@ -69,21 +87,6 @@ function CreateNotification() {
               </MDBox>
 
               {/* Styled Dropdown */}
-              {/* <MDBox mb={4}>
-                <FormControl fullWidth>
-                  <InputLabel>Notification Type</InputLabel>
-                  <Select
-                    value={type}
-                    label="Notification Type"
-                    onChange={(e) => setType(e.target.value)}
-                  >
-                    <MenuItem value="success">Success</MenuItem>
-                    <MenuItem value="info">Info</MenuItem>
-                    <MenuItem value="warning">Warning</MenuItem>
-                    <MenuItem value="error">Error</MenuItem>
-                  </Select>
-                </FormControl>
-              </MDBox> */}
 
               <MDButton variant="gradient" color="info" fullWidth onClick={handleSubmit}>
                 Submit Notification
@@ -92,17 +95,6 @@ function CreateNotification() {
           </Grid>
         </Grid>
       </MDBox>
-
-      {/* <MDSnackbar
-        open={openSB}
-        onClose={closeSB}
-        close={closeSB}
-        color={type}
-        title={title || "Notification"}
-        content={message || "Message content"}
-        dateTime="Just Now"
-        icon={type === "success" ? "check" : type === "error" ? "warning" : "notifications"}
-      /> */}
 
       <Footer />
     </DashboardLayout>
