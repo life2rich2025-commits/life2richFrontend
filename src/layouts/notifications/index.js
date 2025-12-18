@@ -44,6 +44,7 @@ function CreateNotification() {
       if (res.data.success) {
         setTitle("");
         setMessage("");
+        alert(res.data.message);
         // fetchUPI();
       }
     } catch (error) {
