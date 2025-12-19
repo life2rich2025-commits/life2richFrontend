@@ -40,6 +40,7 @@ import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import Notifications from "layouts/notifications";
+import PaymentHistory from "layouts/payment";
 import UPI from "layouts/upi";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
@@ -88,6 +89,14 @@ const routes = [
     icon: <Icon fontSize="small">notifications</Icon>,
     route: "/notifications",
     component: <Notifications />,
+  },
+  {
+    type: "collapse",
+    name: "Payment",
+    key: "payment",
+    icon: <Icon fontSize="small">Payment</Icon>,
+    route: "/payment",
+    component: <PaymentHistory />,
   },
   // {
   //   type: "collapse",
