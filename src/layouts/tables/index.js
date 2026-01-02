@@ -32,6 +32,7 @@ export default function VoucherManagement() {
   const [categoryAmount, setCategoryAmount] = useState("");
   const [limitVoucherRange, setLimitVoucherRange] = useState("");
   const [winPrizeRange, setWinPrizeRange] = useState("");
+  const [minPrizeRange, setMinPrizeRange] = useState("");
 
   // Fetch vouchers from backend
   const fetchVouchers = async () => {
@@ -57,6 +58,7 @@ export default function VoucherManagement() {
         amount: categoryAmount || "500",
         limitVoucher: limitVoucherRange,
         winPrizeRange: winPrizeRange,
+        minPrizeRange: minPrizeRange,
       };
       const res = await axios.post(API_URL + "/api/dashboard/addVoucher", addVoucherJson, {
         headers: { "Content-Type": "application/json" },
@@ -276,9 +278,16 @@ export default function VoucherManagement() {
             fullWidth
           />
           <TextField
-            label="Win Prize Range"
+            label="Max Prize Range"
             value={winPrizeRange}
             onChange={(e) => setWinPrizeRange(e.target.value)}
+            fullWidth
+          />
+
+          <TextField
+            label="Min Prize Range"
+            value={minPrizeRange}
+            onChange={(e) => setMinPrizeRange(e.target.value)}
             fullWidth
           />
         </DialogContent>
