@@ -42,6 +42,7 @@ import Billing from "layouts/billing";
 import Notifications from "layouts/notifications";
 import PaymentHistory from "layouts/payment";
 import UserPaymentHistory from "layouts/userPayment";
+import WinnerPaymentHistory from "layouts/winners";
 import UPI from "layouts/upi";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
@@ -107,6 +108,14 @@ const routes = [
     icon: <Icon fontSize="small">UserPayment</Icon>,
     route: "/userpayment",
     component: <UserPaymentHistory />,
+  },
+  {
+    type: "collapse",
+    name: "Winner",
+    key: "winner",
+    icon: <Icon fontSize="small">Winner</Icon>,
+    route: "/winnerPaymentHistory",
+    component: <WinnerPaymentHistory />,
   },
   // {
   //   type: "collapse",
