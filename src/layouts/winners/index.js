@@ -73,6 +73,34 @@ function WinnerPaymentHistory() {
     });
   };
 
+  const handleFromDate = (e) => {
+    setFilters({
+      ...filters,
+      fromDate: e.target.value || "",
+    });
+  };
+
+  const handltoDate = (e) => {
+    setFilters({
+      ...filters,
+      toDate: e.target.value || "",
+    });
+  };
+
+  const handleMaxAmount = (e) => {
+    setFilters({
+      ...filters,
+      maxWinAmount: e.target.value || "",
+    });
+  };
+
+  const handleMinAmount = (e) => {
+    setFilters({
+      ...filters,
+      minWinAmount: e.target.value || "",
+    });
+  };
+
   // 🔹 Apply Filters
   const applyFilters = () => {
     fetchPayments(filters);
@@ -115,8 +143,8 @@ function WinnerPaymentHistory() {
           <Grid item xs={12} md={3}>
             <select
               label="User Name"
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              value={filters.userId}
+              onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
               style={{
                 width: "100%",
                 padding: 10,
@@ -140,7 +168,7 @@ function WinnerPaymentHistory() {
               label="From Date"
               name="fromDate"
               value={filters.fromDate}
-              onChange={handleChange}
+              onChange={handleFromDate}
               InputLabelProps={{ shrink: true }}
               fullWidth
             />
@@ -152,7 +180,7 @@ function WinnerPaymentHistory() {
               label="To Date"
               name="toDate"
               value={filters.toDate}
-              onChange={handleChange}
+              onChange={handltoDate}
               InputLabelProps={{ shrink: true }}
               fullWidth
             />
@@ -164,7 +192,7 @@ function WinnerPaymentHistory() {
               label="Min Win Amount"
               name="minWinAmount"
               value={filters.minWinAmount}
-              onChange={handleChange}
+              onChange={handleMinAmount}
               fullWidth
             />
           </Grid>
@@ -175,7 +203,7 @@ function WinnerPaymentHistory() {
               label="Max Win Amount"
               name="maxWinAmount"
               value={filters.maxWinAmount}
-              onChange={handleChange}
+              onChange={handleMaxAmount}
               fullWidth
             />
           </Grid>
